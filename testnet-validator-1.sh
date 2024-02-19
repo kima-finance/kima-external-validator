@@ -51,7 +51,7 @@ sudo apt update -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install make -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install jq -y
 cd kima-testnet-validator
-nohup make up-kima -d > up-kima.log 2>&1 &
+nohup make up-reset-kima -d > up-kima.log 2>&1 &
 pid=$!
 disown $pid
 sleep 60
