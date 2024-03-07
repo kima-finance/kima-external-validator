@@ -33,7 +33,7 @@ fi
 
 echo "Updating configuration..."
 # Replace 'your_value' with "$KEY_NAME" to use the passed-in or environment variable value
-./update_config.sh --key-name "$KEY_NAME"
+./update-config.sh --key-name "$KEY_NAME"
 # Check if configuration update was successful
 if [ $? -eq 0 ]; then
     echo "Configuration updated successfully."
