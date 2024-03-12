@@ -1,5 +1,13 @@
 #! /bin/bash
 
+# Load the .env file
+if [ -f .env ]; then
+    export $(cat .env | xargs)
+else
+    echo "Error: .env file not found. Please create a .env file based on the .env.template file and fill in the actual values."
+    exit 1
+fi
+
 # Check if a key-name was provided as an argument
 if [ -z "$1" ]; then
     echo "Usage: $0 KEY_NAME"
@@ -34,9 +42,24 @@ else
 fi
 
 echo "Setting up SSH..."
-echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+# Ensure the SSH directory exists
+mkdir -p ~/.ssh
 
+# Ensure permissions are correct on the SSH directory
+chmod 700 ~/.ssh
+
+# Copy the private key from the specified path to your .ssh directory (if needed)
+if [ -n "$SSH_PRIVATE_KEY_PATH" ]; then
+    cp $SSH_PRIVATE_KEY_PATH ~/.ssh/id_rsa
+else
+    echo "Error: SSH_PRIVATE_KEY_PATH is not set."
+    exit 1
+fi
+
+# Set the appropriate permissions for the private key file
 chmod 600 ~/.ssh/id_rsa
+
+# Add GitHub to known hosts to avoid interactive prompt asking for confirmation
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 echo "Cloning kima-testnet-validator repository..."
