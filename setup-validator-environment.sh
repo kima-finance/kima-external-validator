@@ -1,13 +1,15 @@
 #! /bin/bash
 
-# Check if a key-name was provided as an argument
-if [ -z "$1" ]; then
-    echo "Usage: $0 KEY_NAME"
+# Check if both key-name and external-ip were provided as arguments
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 KEY_NAME EXTERNAL_IP"
     echo "KEY_NAME is the name of the validator node."
+    echo "EXTERNAL_IP is the external IP address of the node."
     exit 1
 fi
 
 KEY_NAME="$1"  # Assign the first command-line argument to KEY_NAME
+EXTERNAL_IP="$2"  # Assign the second command-line argument to EXTERNAL_IP
 
 echo "Updating system packages..."
 if sudo apt update -y && sudo DEBIAN_FRONTEND=noninteractive apt install docker.io docker-compose openssh-server make jq -y; then
@@ -33,7 +35,7 @@ fi
 
 echo "Updating configuration..."
 # Replace 'your_value' with "$KEY_NAME" to use the passed-in or environment variable value
-./update-config.sh --key-name "$KEY_NAME"
+./update-config.sh --key-name "$KEY_NAME" --external-ip "$EXTERNAL_IP"
 # Check if configuration update was successful
 if [ $? -eq 0 ]; then
     echo "Configuration updated successfully."

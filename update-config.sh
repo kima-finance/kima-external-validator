@@ -50,6 +50,11 @@ while [[ $# -gt 0 ]]; do
             shift # past argument
             shift # past value
             ;;
+        --external-ip) # New option for external IP
+            EXTERNAL_IP="$2"
+            shift # past argument
+            shift # past value
+            ;;
         *)    # unknown option
             echo "Unknown option $1"
             exit 1
@@ -65,5 +70,6 @@ done
 [[ ! -z "$TSS_IP" ]] && update_config '.tss_ip' "$TSS_IP"
 [[ ! -z "$REST_NODE_IPS" ]] && update_config '.rest_node_ips' "$REST_NODE_IPS"
 [[ ! -z "$AMOUNT" ]] && update_config '.validator_config.amount' "$AMOUNT"
+[[ ! -z "$EXTERNAL_IP" ]] && update_config '.external_ip' "$EXTERNAL_IP" # Update the external IP
 
 echo "Configuration updated successfully."
