@@ -81,6 +81,16 @@ else
     exit 1
 fi
 
+echo "Adding Blockchain Networks Configuration (RPC and WSS HOSTS)"
+./add_node_endpoints.sh
+# Check if configuration update was successful
+if [ $? -eq 0 ]; then
+    echo "Blockchain Networks Configuration added successfully."
+else
+    echo "Failed to update Blockchain Networks Endpoints."
+    exit 1
+fi
+
 # Navigate to the cloned repository directory
 cd kima-testnet-validator
 echo "Setting up the KIMA validator..."
