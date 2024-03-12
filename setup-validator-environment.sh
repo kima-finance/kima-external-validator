@@ -1,15 +1,29 @@
 #! /bin/bash
 
-# Check if both key-name and external-ip were provided as arguments
-if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "Usage: $0 KEY_NAME EXTERNAL_IP"
+# Check if a key-name was provided as an argument
+if [ -z "$1" ]; then
+    echo "Usage: $0 KEY_NAME"
     echo "KEY_NAME is the name of the validator node."
-    echo "EXTERNAL_IP is the external IP address of the node."
     exit 1
 fi
 
 KEY_NAME="$1"  # Assign the first command-line argument to KEY_NAME
-EXTERNAL_IP="$2"  # Assign the second command-line argument to EXTERNAL_IP
+
+# Ensure that 'curl' is installed on your system
+if ! command -v curl &> /dev/null; then
+    echo "curl could not be found. Please install curl to continue."
+    exit 1
+fi
+
+# Automatically fetch the external IP address of this machine using api.ipify.org
+EXTERNAL_IP=$(curl -s https://api.ipify.org)
+echo "My IP address is: $EXTERNAL_IP"
+
+# Validate that we actually got something that looks like an IP address
+if [[ ! $EXTERNAL_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error obtaining external IP address."
+    exit 1
+fi
 
 echo "Updating system packages..."
 if sudo apt update -y && sudo DEBIAN_FRONTEND=noninteractive apt install docker.io docker-compose openssh-server make jq -y; then
