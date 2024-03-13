@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# Path to the JSON configuration file
-CONFIG_FILE="./kima-testnet-validator/base_image/node_config.json"
-
-# Function to update a configuration parameter
+# Function to update a configuration parameter in a given file
 update_config() {
-    local path="$1"
-    local value="$2"
-    jq "$path = \"$value\"" $CONFIG_FILE > temp.json && mv temp.json $CONFIG_FILE
+    local file="$1"
+    local path="$2"
+    local value="$3"
+    jq "$path = \"$value\"" "$file" > temp.json && mv temp.json "$file"
 }
+
+# Paths to the JSON configuration files
+CONFIG_FILE_ONE="./kima-testnet-validator/base_image/node_config.json"
+CONFIG_FILE_TWO="./kima-testnet-validator/node/config_json_tools/config_template.json"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -20,37 +22,7 @@ while [[ $# -gt 0 ]]; do
             shift # past argument
             shift # past value
             ;;
-        --keyring-backend)
-            KEYRING_BACKEND="$2"
-            shift # past argument
-            shift # past value
-            ;;
-        --chain-id)
-            CHAIN_ID="$2"
-            shift # past argument
-            shift # past value
-            ;;
-        --genesis-node-ip)
-            GENESIS_NODE_IP="$2"
-            shift # past argument
-            shift # past value
-            ;;
-        --tss-ip)
-            TSS_IP="$2"
-            shift # past argument
-            shift # past value
-            ;;
-        --rest-node-ips)
-            REST_NODE_IPS="$2"
-            shift # past argument
-            shift # past value
-            ;;
-        --amount)
-            AMOUNT="$2"
-            shift # past argument
-            shift # past value
-            ;;
-        --external-ip) # New option for external IP
+        --external-ip) # Option for external IP
             EXTERNAL_IP="$2"
             shift # past argument
             shift # past value
@@ -62,14 +34,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Update the configuration file with the provided values
-[[ ! -z "$KEY_NAME" ]] && update_config '.key_name' "$KEY_NAME"
-[[ ! -z "$KEYRING_BACKEND" ]] && update_config '.keyring_backend' "$KEYRING_BACKEND"
-[[ ! -z "$CHAIN_ID" ]] && update_config '.chain_id' "$CHAIN_ID"
-[[ ! -z "$GENESIS_NODE_IP" ]] && update_config '.genesis_node_ip' "$GENESIS_NODE_IP"
-[[ ! -z "$TSS_IP" ]] && update_config '.tss_ip' "$TSS_IP"
-[[ ! -z "$REST_NODE_IPS" ]] && update_config '.rest_node_ips' "$REST_NODE_IPS"
-[[ ! -z "$AMOUNT" ]] && update_config '.validator_config.amount' "$AMOUNT"
-[[ ! -z "$EXTERNAL_IP" ]] && update_config '.external_ip' "$EXTERNAL_IP" # Update the external IP
+# Check for necessary parameters
+if [[ -z "$KEY_NAME" ]] || [[ -z "$EXTERNAL_IP" ]]; then
+    echo "Missing required arguments."
+    echo "Usage: $0 --key-name <KEY_NAME> --external-ip <EXTERNAL_IP>"
+    exit 1
+fi
 
-echo "Configuration updated successfully."
+# Update the configuration files with the provided values
+update_config "$CONFIG_FILE_ONE" '.key_name' "$KEY_NAME"
+update_config "$CONFIG_FILE_ONE" '.external_ip' "$EXTERNAL_IP"
+update_config "$CONFIG_FILE_TWO" '.kimachain.signer_name' "$KEY_NAME"
+update_config "$CONFIG_FILE_TWO" '.tss_ecdsa.external_ip' "$EXTERNAL_IP"
+update_config "$CONFIG_FILE_TWO" '.tss_eddsa.external_ip' "$EXTERNAL_IP"
+
+echo "Configurations updated successfully."
