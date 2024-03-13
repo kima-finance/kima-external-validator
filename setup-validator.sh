@@ -62,16 +62,35 @@ chmod 600 ~/.ssh/id_rsa
 # Add GitHub to known hosts to avoid interactive prompt asking for confirmation
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-echo "Cloning kima-testnet-validator repository..."
-if git clone git@github.com:kima-finance/kima-testnet-validator.git; then
-    echo "Repository cloned successfully."
+echo " ######################## Cloning kima-testnet-validator repository ################################"
+
+REPO_DIR="kima-testnet-validator"
+REPO_URL="git@github.com:kima-finance/kima-testnet-validator.git"
+
+echo "Checking for $REPO_DIR repository..."
+if [ -d "$REPO_DIR" ]; then
+    echo "$REPO_DIR directory already exists. Pulling latest changes..."
+    cd "$REPO_DIR"
+    if git pull; then
+        echo "Repository updated successfully."
+    else
+        echo "Failed to update repository."
+        exit 1
+    fi
+    cd ..
 else
-    echo "Failed to clone repository."
-    exit 1
+    echo "Cloning $REPO_DIR repository..."
+    if git clone "$REPO_URL"; then
+        echo "Repository cloned successfully."
+    else
+        echo "Failed to clone repository."
+        exit 1
+    fi
 fi
 
 echo "Updating configuration..."
 # Replace 'your_value' with "$KEY_NAME" to use the passed-in or environment variable value
+chmod +x ./update-config.sh
 ./update-config.sh --key-name "$KEY_NAME" --external-ip "$EXTERNAL_IP"
 # Check if configuration update was successful
 if [ $? -eq 0 ]; then
@@ -82,6 +101,7 @@ else
 fi
 
 echo "Adding Blockchain Networks Configuration (RPC and WSS HOSTS)"
+chmod +x ./add_node_endpoints.sh
 ./add_node_endpoints.sh
 # Check if configuration update was successful
 if [ $? -eq 0 ]; then
