@@ -91,6 +91,8 @@ fi
 echo "Updating configuration..."
 # Replace 'your_value' with "$KEY_NAME" to use the passed-in or environment variable value
 chmod +x ./update-config.sh
+chmod +x ./kima-testnet-validator/base_image/node_config.json
+chmod +x ./kima-testnet-validator/node/config_json_tools/config_template.json
 ./update-config.sh --key-name "$KEY_NAME" --external-ip "$EXTERNAL_IP"
 # Check if configuration update was successful
 if [ $? -eq 0 ]; then
