@@ -62,38 +62,48 @@ chmod 600 ~/.ssh/id_rsa
 # Add GitHub to known hosts to avoid interactive prompt asking for confirmation
 ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-echo " ######################## Cloning kima-testnet-validator repository ################################"
-
-REPO_DIR="kima-testnet-validator"
-REPO_URL="git@github.com:kima-finance/kima-testnet-validator.git"
-
-echo "Checking for $REPO_DIR repository..."
-if [ -d "$REPO_DIR" ]; then
-    echo "$REPO_DIR directory already exists. Pulling latest changes..."
-    cd "$REPO_DIR"
-    if git pull; then
-        echo "Repository updated successfully."
-    else
-        echo "Failed to update repository."
-        exit 1
-    fi
-    cd ..
-else
-    echo "Cloning $REPO_DIR repository..."
-    if git clone "$REPO_URL"; then
-        echo "Repository cloned successfully."
-    else
-        echo "Failed to clone repository."
-        exit 1
-    fi
-fi
+#echo " ######################## Cloning kima-testnet-validator repository ################################"
+#
+#REPO_DIR="kima-testnet-validator"
+#REPO_URL="git@github.com:kima-finance/kima-testnet-validator.git"
+#
+#echo "Checking for $REPO_DIR repository..."
+#if [ -d "$REPO_DIR" ]; then
+#    echo "$REPO_DIR directory already exists. Pulling latest changes..."
+#    cd "$REPO_DIR"
+#    if git pull; then
+#        echo "Repository updated successfully."
+#    else
+#        echo "Failed to update repository."
+#        exit 1
+#    fi
+#    cd ..
+#else
+#    echo "Cloning $REPO_DIR repository..."
+#    if git clone "$REPO_URL"; then
+#        echo "Repository cloned successfully."
+#    else
+#        echo "Failed to clone repository."
+#        exit 1
+#    fi
+#fi
 
 echo "Updating configuration..."
 # Replace 'your_value' with "$KEY_NAME" to use the passed-in or environment variable value
 chmod +x ./update-config.sh
-chmod +x ./kima-testnet-validator/base_image/node_config.json
-chmod +x ./kima-testnet-validator/node/config_json_tools/config_template.json
+
+git clone git@github.com:kima-finance/kima-testnet-validator.git
+cd kima-testnet-validator
+git checkout stage-testing-validators
+cd ..
 ./update-config.sh --key-name "$KEY_NAME" --external-ip "$EXTERNAL_IP"
+
+
+
+#chmod +x ./kima-testnet-validator/base_image/node_config.json
+#chmod +x ./kima-testnet-validator/node/config_json_tools/config_template.json
+
+
 # Check if configuration update was successful
 if [ $? -eq 0 ]; then
     echo "Configuration updated successfully."
@@ -115,7 +125,7 @@ fi
 
 # Navigate to the cloned repository directory
 cd kima-testnet-validator
-git checkout -b origin/stage-testing-validators
+
 echo "Setting up the KIMA validator..."
 if nohup make up-reset-kima -d > up-kima.log 2>&1 & then
     pid=$!
@@ -126,6 +136,8 @@ else
     echo "Failed to initiate KIMA validator setup."
     exit 1
 fi
+
+sleep 5
 
 echo "Copying kimad..."
 if make copy-kimad; then
