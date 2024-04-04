@@ -137,7 +137,7 @@ else
     exit 1
 fi
 
-sleep 5
+sleep 30
 
 echo "Copying kimad..."
 if make copy-kimad; then
