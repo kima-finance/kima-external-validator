@@ -115,6 +115,7 @@ fi
 
 # Navigate to the cloned repository directory
 cd kima-testnet-validator
+git checkout -b origin/stage-testing-validators
 echo "Setting up the KIMA validator..."
 if nohup make up-reset-kima -d > up-kima.log 2>&1 & then
     pid=$!
